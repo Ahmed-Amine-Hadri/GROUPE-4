@@ -1,0 +1,53 @@
+import pandas as pd
+import numpy as np
+from imblearn.over_sampling import SMOTENC
+
+# 1. Load data
+df = pd.read_csv('csv_result-bone-marrow.csv')
+
+# 2. Preprocessing
+df = df.drop(columns=['id'])
+
+# Replace '?' with NaN for proper handling
+df = df.replace('?', np.nan)
+
+# Define categorical and numerical columns
+categorical_features = [
+    'Recipientgender', 'Stemcellsource', 'Donorage35', 'IIIV', 'Gendermatch',
+    'DonorABO', 'RecipientABO', 'RecipientRh', 'ABOmatch', 'CMVstatus',
+    'DonorCMV', 'RecipientCMV', 'Disease', 'Riskgroup', 'Txpostrelapse',
+    'Diseasegroup', 'HLAmatch', 'HLAmismatch', 'Antigen', 'Alel', 'HLAgrI',
+    'Recipientage10', 'Recipientageint', 'Relapse', 'aGvHDIIIIV', 'extcGvHD'
+]
+
+# Convert columns to appropriate types
+for col in df.columns:
+    if col in categorical_features or col == 'survival_status':
+        # Fill missing categorical values with Mode
+        df[col] = df[col].fillna(df[col].mode()[0])
+    else:
+        # Convert to numeric and fill missing numerical values with Median
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+        df[col] = df[col].fillna(df[col].median())
+
+# 4. Separate X and y
+X = df.drop('survival_status', axis=1)
+y = df['survival_status'].astype(int)
+
+# Get indices for SMOTENC
+cat_indices = [X.columns.get_loc(col) for col in categorical_features]
+
+# 5. Apply SMOTENC
+# Now that we imputed values, len(X) will not be zero
+smote_nc = SMOTENC(categorical_features=cat_indices, random_state=42)
+X_res, y_res = smote_nc.fit_resample(X, y)
+
+# 6. Results
+print(f"Original samples: {len(df)}")
+print(f"Augmented samples: {len(X_res)}")
+print("\nNew class distribution:")
+print(y_res.value_counts())
+
+# Save augmented data
+new_data = pd.concat([X_res, y_res], axis=1)
+new_data.to_csv('augmented_bone_marrow.csv', index=False)
