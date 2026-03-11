@@ -1,0 +1,37 @@
+#JE VAIS UTILISER LE MODELE RANDOM FOREST POUR PREDIRE LA SURVIE DES PATIENTS APRÈS UNE GREFFE DE MOELLE OSSEUSE. CE MODELE EST EFFICACE POUR LES PROBLÈMES DE CLASSIFICATION ET PEUT GÉRER DES DONNÉES AVEC DE NOMBREUSES CARACTÉRISTIQUES.ET UTILISER UNE BASE DE DONNEES NETOYEE PAR ICHRAK ET NORMALISÉE PAR ADAM
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import confusion_matrix, classification_report, ConfusionMatrixDisplay
+
+# 1. Chargement de la base de données
+df = pd.read_csv('bmt_dataset_normalized.csv')
+
+# 2. Séparation des features (X) et de la cible (y)
+# On suppose que 'survival_status' est la colonne à prédire
+X = df.drop('survival_status', axis=1)
+y = df['survival_status']
+
+# 3. Division des données (80% entraînement, 20% test)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 4. Création et entraînement du modèle Random Forest
+rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+rf_model.fit(X_train, y_train)
+
+# 5. Prédictions
+y_pred = rf_model.predict(X_test)
+
+# 6. Affichage des résultats
+print("Rapport de Classification :")
+print(classification_report(y_test, y_pred))
+
+# 7. Matrice de Confusion
+cm = confusion_matrix(y_test, y_pred)
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+plt.title('Matrice de Confusion - Random Forest')
+plt.xlabel('Prédictions')
+plt.ylabel('Valeurs Réelles')
+plt.show()
