@@ -8,7 +8,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix, classification_report, ConfusionMatrixDisplay
 
 # 1. Chargement de la base de données
-df = pd.read_csv('bmt_dataset_normalized.csv')
+df = pd.read_csv('bmt_preprocessed_for_82pct.csv')  # Remplacez par le nom de votre fichier CSV normalisé
 
 # 2. Séparation des features (X) et de la cible (y)
 # On suppose que 'survival_status' est la colonne à prédire
@@ -76,7 +76,7 @@ def optimiser_memoire(df):
     return df
 
 # 1. Charger les données normalisées
-file_path = 'bmt_dataset_normalized.csv' # Remplacez par le nom de votre fichier
+file_path = 'bmt_preprocessed_for_82pct.csv' # Remplacez par le nom de votre fichier
 df = pd.read_csv(file_path)
 
 # --- NOUVEAU : Application de l'optimisation des Floats/Ints ---
@@ -170,7 +170,7 @@ class XGBoostNormalized:
         print("=" * 60)
         
         # Charger le CSV
-        df = pd.read_csv(filepath)
+        df = pd.read_csv("bmt_preprocessed_for_82pct.csv")
         print(f" Données chargées: {df.shape[0]} lignes, {df.shape[1]} colonnes")
         
         # Afficher les colonnes
