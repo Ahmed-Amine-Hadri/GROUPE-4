@@ -126,11 +126,6 @@ plt.savefig('matrice_de_confusion.png')
 print("Matrice de confusion sauvegardée sous 'matrice_de_confusion.png'")
 plt.show()
 "3_XGBOOST"
-"""
-Modèle XGBoost pour données normalisées
-Fichier: bmt_dataset_normalized.csv
-"""
-
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -170,7 +165,7 @@ class XGBoostNormalized:
         print("=" * 60)
         
         # Charger le CSV
-        df = pd.read_csv("bmt_preprocessed_for_82pct.csv")
+        df = pd.read_csv(filepath)
         print(f" Données chargées: {df.shape[0]} lignes, {df.shape[1]} colonnes")
         
         # Afficher les colonnes
@@ -457,7 +452,7 @@ class XGBoostNormalized:
 # Exécution principale
 if __name__ == "__main__":
     # Chemin vers le fichier normalisé
-    DATA_PATH = "data/processed/bmt_dataset_normalized.csv"
+    DATA_PATH = "data/processed/bmt_preprocessed_for_82pct.csv"
     
     print(f"\n Recherche du fichier: {DATA_PATH}")
     
