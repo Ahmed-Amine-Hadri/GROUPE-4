@@ -1,8 +1,3 @@
-"""
-Modèle XGBoost pour données normalisées
-Fichier: bmt_dataset_normalized.csv
-"""
-
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -329,7 +324,7 @@ class XGBoostNormalized:
 # Exécution principale
 if __name__ == "__main__":
     # Chemin vers le fichier normalisé
-    DATA_PATH = "data/processed/bmt_dataset_normalized.csv"
+    DATA_PATH = "data/processed/bmt_preprocessed_for_82pct.csv"
     
     print(f"\n Recherche du fichier: {DATA_PATH}")
     
