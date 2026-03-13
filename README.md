@@ -48,7 +48,10 @@ Optimisation par boucle (range(0, 100)) : C'est la partie la plus avancée. Le c
 Importance par Gain : Le code analyse le Gain (la réduction totale de l'incertitude apportée par chaque variable), ce qui offre une vision plus précise de l'utilité réelle de chaque caractéristique biologique que le simple comptage de fréquence.
 
 *evaluation*
-#
+
+Le modèle XGBoost se distingue comme le plus performant pour cette tâche diagnostique, avec une exactitude de 60,53 %. Son F1-Score (0,5946) est particulièrement instructif : cette métrique représente la moyenne harmonique entre la précision (capacité à ne pas donner de "faux positifs") et le rappel (capacité à détecter tous les malades). Dans un hôpital, un F1-score équilibré est essentiel pour éviter aussi bien les traitements inutiles et stressants que l'absence de détection d'une pathologie réelle.
+
+L'indicateur ROC-AUC (0,6078) du modèle XGBoost mesure, quant à lui, la capacité globale du système à distinguer un patient sain d'un patient atteint, quel que soit le seuil de décision choisi. Une valeur de 0,5 correspondrait au hasard pur ; ici, le score de ~0,61 montre que le modèle possède une certaine capacité de discernement, bien qu'elle reste insuffisante pour une utilisation clinique autonome. À l'inverse, le modèle SVM affiche des résultats très faibles, notamment un rappel (Recall) de seulement 0,2353, ce qui signifierait qu'il passerait à côté de plus de 75 % des patients malades
 #
 #
 #
