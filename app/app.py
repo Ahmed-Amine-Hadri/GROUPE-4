@@ -8,6 +8,9 @@ import plotly.graph_objects as go
 import shap
 import matplotlib.pyplot as plt
 
+# ==========================================
+# 1. Configuration de la page et Design
+# ==========================================
 st.set_page_config(
     page_title="Bone Marrow Transplant Survival Predictor",
     page_icon="🩸",
@@ -104,6 +107,9 @@ except FileNotFoundError:
 st.title("🩸 Pediatric Bone Marrow Transplant Survival Predictor")
 st.markdown("Predict the survival status of pediatric patients after a bone marrow transplant using Machine Learning.")
 
+# ==========================================
+# 2. Chargement des Modèles
+# ==========================================
 @st.cache_resource
 def load_model(model_path):
     return joblib.load(model_path)
@@ -149,6 +155,9 @@ except Exception as e:
     st.sidebar.error(f"Error loading model: {e}")
     st.stop()
 
+# ==========================================
+# 3. Interface Utilisateur (Inputs)
+# ==========================================
 st.header("Patient & Donor Data Input")
 st.markdown("Expand the sections below to enter the clinical features:")
 
@@ -191,6 +200,9 @@ with st.expander("🧬 Donor & Compatibility Matching"):
         recipient_cmv = st.selectbox("Recipient CMV Status", options=[0, 1], format_func=lambda x: "Negative" if x==0 else "Positive")
         ii_iv = st.selectbox("aGVHD II-IV", options=[0, 1], format_func=lambda x: "No" if x==0 else "Yes")
 
+# ==========================================
+# 4. Préparation des Données
+# ==========================================
 input_data = {
     'Recipientage': recipient_age,
     'log_CD34kgx10d6': cd34_dose,
@@ -226,10 +238,8 @@ exact_columns = [
 ]
 df_input = df_input[exact_columns]
 
-for col in df_input.columns:
-    if df_input[col].dtype == 'object':
-        df_input[col] = df_input[col].astype(str).str.replace(r'\[|\]', '', regex=True)
-
+# Plus de regex string compliqué ici. Les widgets envoient des nombres, 
+# on s'assure juste que tout est en float pour la majorité des modèles.
 df_input = df_input.astype(float)
 
 if selected_model_name == 'LightGBM':
@@ -254,6 +264,9 @@ elif selected_model_name == 'SVM':
 
 st.markdown("---")
 
+# ==========================================
+# 5. Prédiction & Explicabilité (SHAP)
+# ==========================================
 if st.button("🔍 Predict Survival Status", type="primary", use_container_width=True):
     with st.spinner(f"Running {selected_model_name} inference..."):
         try:
