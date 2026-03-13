@@ -226,6 +226,12 @@ exact_columns = [
 ]
 df_input = df_input[exact_columns]
 
+for col in df_input.columns:
+    if df_input[col].dtype == 'object':
+        df_input[col] = df_input[col].astype(str).str.replace(r'\[|\]', '', regex=True)
+
+df_input = df_input.astype(float)
+
 if selected_model_name == 'LightGBM':
     categorical_cols = [
         'Recipientgender', 'Stemcellsource', 'Donorage35', 'IIIV', 'Gendermatch',
