@@ -11,8 +11,8 @@ from sklearn.preprocessing import LabelEncoder
 warnings.filterwarnings('ignore')
 
 def main():
-    project_root = Path(r'C:\Users\pc\Documents\Git\Gittt\GROUPE-4')
-    data_path = project_root / 'src' / 'final_dataset.csv'    
+    project_root = Path(__file__).resolve().parent.parent
+    data_path = project_root / 'data' / 'processed' / 'final_dataset.csv'
     models_dir = project_root / 'models'
     
     df_raw = pd.read_csv(data_path)
