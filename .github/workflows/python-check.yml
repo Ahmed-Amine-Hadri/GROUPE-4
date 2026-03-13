@@ -16,3 +16,9 @@ jobs:
     - run: pip install -r requirements.txt
     
     - run: python -m py_compile src/models/train_model.py
+
+    - run: pip install -r requirements.txt
+    
+    - run: pip install pytest
+
+    - run: pytest tests/
