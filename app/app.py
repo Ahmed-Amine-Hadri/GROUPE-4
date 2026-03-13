@@ -290,7 +290,7 @@ if st.button("🔍 Predict Survival Status", type="primary", use_container_width
                         ],
                     }
                 ))
-                
+                 
                 fig.update_layout(
                     paper_bgcolor="rgba(0,0,0,0)",
                     font={'family': "Nunito"},
