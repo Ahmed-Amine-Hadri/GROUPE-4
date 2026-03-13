@@ -306,6 +306,7 @@ if st.button("🔍 Predict Survival Status", type="primary", use_container_width
                 
                 st.plotly_chart(fig, use_container_width=True)
             
+                        
             if selected_model_name == 'XGBoost':
                 st.markdown("---")
                 st.markdown("### 🧠 Model Reasoning (SHAP)")
@@ -328,7 +329,6 @@ if st.button("🔍 Predict Survival Status", type="primary", use_container_width
                             st.pyplot(fig_shap, transparent=True)
                             
                             plt.clf() 
-                            
                         except Exception as e:
                             st.error(f"Could not generate SHAP explanation: {e}")
                 
