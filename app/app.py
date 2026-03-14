@@ -290,7 +290,7 @@ if st.button("🔍 Predict Survival Status", type="primary", use_container_width
                         ],
                     }
                 ))
-                 
+                
                 fig.update_layout(
                     paper_bgcolor="rgba(0,0,0,0)",
                     font={'family': "Nunito"},
@@ -299,6 +299,32 @@ if st.button("🔍 Predict Survival Status", type="primary", use_container_width
                 )
                 
                 st.plotly_chart(fig, use_container_width=True)
-
+            
+            if selected_model_name == 'XGBoost':
+                st.markdown("---")
+                st.markdown("### 🧠 Model Reasoning (SHAP)")
+                st.markdown("The chart below explains how each clinical feature contributed to this specific patient's risk score. Red pushes the risk higher, blue pushes the risk lower.")
+                
+                with st.expander("📊 View Feature Impacts", expanded=False):
+                    with st.spinner("Calculating SHAP values..."):
+                        try:
+                            explainer = shap.TreeExplainer(model)
+                            shap_values = explainer(df_input)
+                            
+                            shap.plots.bar(shap_values[0], show=False)
+                            
+                            fig_shap = plt.gcf()
+                            ax_shap = plt.gca()
+                            
+                            fig_shap.patch.set_alpha(0.0)
+                            ax_shap.patch.set_alpha(0.0)
+                            
+                            st.pyplot(fig_shap, transparent=True)
+                            
+                            plt.clf() 
+                            
+                        except Exception as e:
+                            st.error(f"Could not generate SHAP explanation: {e}")
+                
         except Exception as e:
             st.error(f"Prediction failed: {e}")

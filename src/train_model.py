@@ -118,7 +118,6 @@ class ModelTrainer:
 
     def train_svm(self):
         """
-        Implemented by SVM Team Member
         Trains a Support Vector Machine classifier with RBF kernel and imputation.
         """
         self.logger.info("Running SVM model training...")
@@ -149,7 +148,7 @@ class ModelTrainer:
 
     def train_random_forest(self):
         """
-        Implemented by Random Forest Team Member, data cleaned by Ichrak and normalized by Adam
+        Implemented by amine, data cleaned by Ichrak and normalized by Adam
         Trains a Random Forest classifier.
         """
         self.logger.info("Running Random Forest model training...")
@@ -178,7 +177,6 @@ class ModelTrainer:
 
     def train_lightgbm(self):
         """
-        Implemented by LightGBM Team Member
         Trains a LightGBM classifier evaluating multiple random states for optimal precision.
         """
         self.logger.info("Running LightGBM model training...")
@@ -302,10 +300,6 @@ class ModelTrainer:
         joblib.dump(best_model, self.models_dir / 'lgbm_model.pkl')
 
     def run_all(self):
-        """
-        Implemented by Lead Engineer
-        Run all training routines for the different models sequentially.
-        """
         self.logger.info("Starting all model training processes...")
         self.train_xgboost()
         self.train_svm()
