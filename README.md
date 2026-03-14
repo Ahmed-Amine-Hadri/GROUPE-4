@@ -1,4 +1,5 @@
 # *GROUPE-4*
+#  Architecture
 
 # Tata processing
 analyze_distributions : Identifie les variables numériques trop asymétriques (skewness > 0.75) afin de cibler celles qui nécessitent une transformation pour stabiliser la variance.
@@ -88,3 +89,4 @@ Hiérarchiser les risques : Visualiser si une incompatibilité HLA ou l'âge du 
 Renforcer la confiance : Offrir au personnel médical une interprétation transparente et explicable de l'algorithme, facilitant ainsi la prise de décision clinique.
 # Systeme de suivi
 Pour garantir la maintenabilité et faciliter le débogage de l'application, un système de journalisation centralisé a été implémenté via la fonction utilitaire get_logger. Plutôt que d'utiliser de simples requêtes print(), ce module génère des logs standardisés incluant l'horodatage précis, le module concerné et le niveau de gravité du message (INFO, ERROR, etc.). Son architecture est spécialement pensée pour des environnements interactifs comme Streamlit : elle intègre une sécurité (if not logger.handlers:) qui empêche la duplication des messages lors des rechargements multiples de l'interface. De plus, en redirigeant les flux directement vers la sortie standard (sys.stdout), ce système rend l'application "Cloud-ready", permettant aux outils de monitoring externes (comme Docker ou les plateformes cloud) de capturer et d'analyser nativement l'activité et les erreurs du modèle en production
+# Roadmap
