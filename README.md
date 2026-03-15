@@ -1,27 +1,47 @@
 # *GROUPE-4*
 #  Architecture
 
-# Tata processing
-analyze_distributions : Identifie les variables numériques trop asymétriques (skewness > 0.75) afin de cibler celles qui nécessitent une transformation pour stabiliser la variance.
+# data processing
+**analyze_distributions** : Identifie les variables numériques trop asymétriques (skewness > 0.75) afin de cibler celles qui nécessitent une transformation pour stabiliser la variance.
 
-analyze_correlations : Repère les variables redondantes via une matrice de Spearman ; on l'utilise pour éviter la multicolinéarité qui fausse l'importance des caractéristiques.
+**analyze_correlations** : Repère les variables redondantes via une matrice de Spearman ; on l'utilise pour éviter la multicolinéarité qui fausse l'importance des caractéristiques.
 
-optimize_memory : Convertit les types de données (ex: float64 en float32) pour réduire l'empreinte RAM et accélérer les calculs sans perte de précision significative.
+**optimize_memory** : Convertit les types de données (ex: float64 en float32) pour réduire l'empreinte RAM et accélérer les calculs sans perte de précision significative.
 
-clean_data : Supprime les colonnes inutiles (ID, dates), impute les valeurs manquantes et encode les catégories en variables muettes pour rendre le dataset exploitable par un modèle.
+**clean_data** : Supprime les colonnes inutiles (ID, dates), impute les valeurs manquantes et encode les catégories en variables muettes pour rendre le dataset exploitable par un modèle.
 
-handle_outliers : Écrête (clipping) les valeurs extrêmes aux percentiles 1% et 99% pour empêcher les données aberrantes de biaiser l'apprentissage.
+**handle_outliers** : Écrête (clipping) les valeurs extrêmes aux percentiles 1% et 99% pour empêcher les données aberrantes de biaiser l'apprentissage.
 
-#apply_log_transformations : Applique le logarithme sur les colonnes asymétriques identifiées plus haut pour normaliser leur distribution et améliorer la performance prédictive.
+**apply_log_transformations** : Applique le logarithme sur les colonnes asymétriques identifiées plus haut pour normaliser leur distribution et améliorer la performance prédictive.
 
- reduce_multicollinearity : Supprime les variables trop corrélées entre elles (R > 0.80) pour simplifier le modèle et limiter le risque de surapprentissage (overfitting).
+**reduce_multicollinearity** : Supprime les variables trop corrélées entre elles (R > 0.80) pour simplifier le modèle et limiter le risque de surapprentissage (overfitting).
+
+**Augmentation des Données (SMOTE) et Sécurité**:
+Pour améliorer l'apprentissage de nos modèles sans fausser l'évaluation, nous avons appliqué une stratégie stricte d'augmentation de données :
+
+La Règle d'Or (Zéro Fuite de Données) : Avant toute modification, nous avons isolé 10% du dataset (19 patients). Ce jeu de test est gardé intact pour garantir une évaluation finale sur des données 100% réelles.
+
+Génération Synthétique (SMOTE) : Nous avons appliqué l'algorithme SMOTE uniquement sur les 90% restants (le jeu d'entraînement) pour créer des profils cliniques virtuels réalistes.
+
+Le Résultat (2 Fichiers) :
+
+augmented_train_dataset_400.csv : Un jeu d'entraînement enrichi et parfaitement équilibré de 400 patients (200 survivants / 200 décès) pour nourrir nos modèles (XGBoost, SVM, etc.).
+
+holdout_test_dataset.csv : Le jeu de test pur de 19 patients réels, utilisé exclusivement comme "examen final" pour valider l'IA.
 # Train models
+En recherche médicale pédiatrique, les données sont rares (190 patients ici). Une division classique 70:20:10 (Entraînement / Validation / Test) n'aurait laissé que 133 patients pour l'entraînement, un volume insuffisant pour des modèles complexes comme XGBoost, entraînant une forte instabilité.
+
+Pour maximiser l'apprentissage tout en gardant une évaluation rigoureuse, nous avons opté pour une approche 90:10 avec Validation Croisée :
+
+Développement & Validation (90% - 171 patients) : Au lieu de sacrifier 20% des données pour une validation statique, nous avons appliqué une Validation Croisée (5-Fold) sur ces 90%. Chaque patient a ainsi servi à tour de rôle pour l'entraînement et l'évaluation interne, maximisant l'"expérience clinique" du modèle.
+
+Test Final (10% - 19 patients) : Ce groupe a été totalement isolé (Holdout). Conservé comme "examen final", il garantit une évaluation non biaisée des performances du modèle sur des patients inédits.
  *XGBoost (Extreme Gradient Boosting)*
 C’est un algorithme de boosting qui construit des arbres de décision de manière séquentielle. Chaque nouvel arbre tente de corriger les erreurs de prédiction des arbres précédents.
 
 Pondération des classes (scale_pos_weight) : Le code calcule dynamiquement le ratio entre les patients décédés et les survivants. C'est crucial pour forcer l'IA à ne pas ignorer la classe minoritaire (souvent les décès dans ce type de dataset).
 
-Paramètres de contrôle : max_depth=6 limite la profondeur des arbres pour éviter que le modèle n'apprenne par cœur des détails inutiles (overfitting). learning_rate=0.1 assure une progression lente mais stable de l'apprentissage.
+Paramètres de contrôle : **max_depth=6** limite la profondeur des arbres pour éviter que le modèle n'apprenne par cœur des détails inutiles (overfitting). **learning_rate=0.1** assure une progression lente mais stable de l'apprentissage.
 
 Analyse d'importance : Le code génère un graphique des "Top 15 Features". Cela permet de voir techniquement quelles variables biologiques (comme le dosage CD34) ont le plus pesé dans la décision finale du modèle.
 *SVM (Support Vector Machine)*
@@ -29,25 +49,25 @@ Le SVM cherche à tracer une frontière (un hyperplan) qui sépare le plus large
 
 Imputation (SimpleImputer) : Contrairement aux arbres, le SVM est mathématiquement incapable de gérer les valeurs manquantes (NaN). Le code utilise donc la médiane pour remplir les trous avant de présenter les données au modèle.
 
-Noyau RBF (kernel='rbf') : Ce noyau permet de créer une frontière de décision non linéaire (courbe). C'est indispensable car, en biologie, les relations entre les variables sont rarement de simples lignes droites.
+Noyau RBF : Ce noyau permet de créer une frontière de décision non linéaire . C'est indispensable car, en biologie, les relations entre les variables sont rarement de simples lignes droites.
 
-Probabilités : probability=True est activé pour que le modèle ne donne pas juste un "oui/non", mais un score de confiance (ex: 85% de chances de survie).
+Probabilités : probability=True est activé pour que le modèle ne donne pas juste un "oui/non", mais un **score de confiance** (ex: 85% de chances de survie).
 *Random Forest*
 C’est une méthode de "Bagging". On crée 100 arbres de décision différents qui votent. La décision finale est celle de la majorité.
 
-Stabilité : Avec n_estimators=100, le code construit une forêt robuste. Si un arbre fait une erreur isolée, elle est compensée par les 99 autres.
+Stabilité : Avec **n_estimators=100**, le code construit une forêt robuste. Si un arbre fait une erreur isolée, elle est compensée par les 99 autres.
 
-Reproductibilité : Le random_state=42 est fixé pour que l'aspect aléatoire de la forêt soit identique à chaque exécution, facilitant le débogage.
+Reproductibilité : **Le random_state=42** est fixé pour que l'aspect aléatoire de la forêt soit identique à chaque exécution, facilitant le débogage.
 
-Rapport de performance : L'utilisation de classification_report permet d'analyser le score F1, qui est l'équilibre parfait entre la précision (ne pas se tromper de diagnostic) et le rappel (détecter tous les patients à risque).
+Rapport de performance : L'utilisation de classification_report permet d'analyser le **score F1**, qui est l'équilibre parfait entre la précision (ne pas se tromper de diagnostic) et le rappel (détecter tous les patients à risque).
 *LightGBM (Light Gradient Boosting Machine)*
 Une variante ultra-rapide du boosting qui utilise une croissance des arbres par "feuilles" plutôt que par "niveaux"
 
-Prétraitement manuel : Le code applique un StandardScaler et un passage au Logarithme. Cela normalise les échelles de données (ex: l'âge entre 0 et 80 vs les globules blancs en milliers) pour que le modèle ne soit pas perturbé par les grands nombres.
+Prétraitement manuel : Le code applique un StandardScaler et un passage au Logarithme. Cela normalise les échelles de données pour que le modèle ne soit pas perturbé par les grands nombres.
 
-Optimisation par boucle (range(0, 100)) : C'est la partie la plus avancée. Le code teste 100 graines aléatoires différentes pour le découpage Train/Test. Il cherche la "meilleure graine" qui maximise l'Accuracy tout en gardant une Precision décente (> 0.65).
+Optimisation par boucle (range(0, 100)) : C'est la partie la plus avancée. Le code teste **100 graines aléatoires différentes** pour le découpage Train/Test. Il cherche la "meilleure graine" qui maximise l'Accuracy tout en gardant une Precision décente (> 0.65).
 
-Importance par Gain : Le code analyse le Gain (la réduction totale de l'incertitude apportée par chaque variable), ce qui offre une vision plus précise de l'utilité réelle de chaque caractéristique biologique que le simple comptage de fréquence.
+Importance par Gain : Le code analyse le Gain, ce qui offre une vision plus précise de l'utilité réelle de chaque caractéristique biologique que le simple comptage de fréquence.
 
 # Evaluation
 
@@ -74,8 +94,15 @@ Random Forest
 
 LightGBM
 
+3. Gestion des Identifiants et Accès Restreint:
+Pour garantir la stricte confidentialité des données cliniques, l'utilisation de l'application est soumise à un contrôle d'accès basé sur des identifiants uniques et personnels.
 
-3. Visualisation Intelligente:
+Identifiants Institutionnels : La connexion à l'interface requiert l'utilisation d'un identifiant professionnel. Cela empêche tout accès public, anonyme ou non autorisé à l'outil de prédiction.
+
+Protection des Mots de Passe : Les mots de passe associés à chaque identifiant ne sont jamais stockés en clair. Ils sont cryptés de bout en bout pour assurer une protection maximale contre les failles de sécurité.
+
+
+4. Visualisation Intelligente:
 Une fois la prédiction lancée, le résultat n'est pas un simple texte. Il est accompagné d'une jauge interactive générée avec Plotly. Ce graphique traduit la probabilité mathématique brute en un indicateur visuel clair, coloré (vert, jaune, rouge) et facile à interpréter en un coup d'œil pour évaluer le niveau de risque.
 *Transparence Médicale : Explicabilité avec SHAP*
 Dans le domaine médical, une prédiction "boîte noire" n'est pas suffisante ; il est crucial de comprendre pourquoi le modèle a pris une décision. C'est ici qu'intervient l'intégration de la bibliothèque SHAP (SHapley Additive exPlanations).
@@ -90,3 +117,67 @@ Renforcer la confiance : Offrir au personnel médical une interprétation transp
 # Systeme de suivi
 Pour garantir la maintenabilité et faciliter le débogage de l'application, un système de journalisation centralisé a été implémenté via la fonction utilitaire get_logger. Plutôt que d'utiliser de simples requêtes print(), ce module génère des logs standardisés incluant l'horodatage précis, le module concerné et le niveau de gravité du message (INFO, ERROR, etc.). Son architecture est spécialement pensée pour des environnements interactifs comme Streamlit : elle intègre une sécurité (if not logger.handlers:) qui empêche la duplication des messages lors des rechargements multiples de l'interface. De plus, en redirigeant les flux directement vers la sortie standard (sys.stdout), ce système rend l'application "Cloud-ready", permettant aux outils de monitoring externes (comme Docker ou les plateformes cloud) de capturer et d'analyser nativement l'activité et les erreurs du modèle en production
 # Roadmap
+*Assistant Médical IA (Chatbot LLM)*
+Il ne s'agit pas de créer une IA de zéro, mais d'utiliser un modèle de langage (LLM) existant et de le contraindre à répondre uniquement sur des questions médicales liées à notre application.
+
+Technique : RAG (Retrieval-Augmented Generation). Cette technique permet de fournir au modèle de langage des documents médicaux spécifiques (ou le contexte du patient actuel) pour qu'il base ses réponses sur ces faits, évitant ainsi les "hallucinations".
+
+Modèles : Pour des raisons de confidentialité médicale, il vaut mieux éviter d'envoyer les données sur des serveurs externes. On privilégie des modèles open-source hébergés localement comme Llama 3 (Meta) ou Mistral (français).
+
+Bibliothèques Python :
+
+LangChain ou LlamaIndex : Pour orchestrer le LLM, lui passer les données du patient et gérer la mémoire de la conversation.
+
+Ollama : Pour faire tourner les modèles Llama/Mistral localement sur notre machine ou notre serveur de façon ultra-simple.
+
+st.chat_message et st.chat_input : Les composants natifs de Streamlit pour créer l'interface visuelle du chat.
+
+*Génération de Rapports Cliniques (PDF)*
+L'objectif est de prendre les inputs Streamlit, le résultat de survie, et les graphiques, puis de figer tout cela dans un document imprimable.
+
+Technique : Conversion HTML-vers-PDF. On crée un "squelette" de document en HTML/CSS (pour garder de belles couleurs et le logo de l'hôpital), puis on injecte les données du patient dedans avec Python avant de le convertir.
+
+Bibliothèques Python :
+
+Jinja2 : Pour créer des templates HTML dynamiques (remplacer la balise {{ patient_age }} par la vraie valeur).
+
+WeasyPrint ou pdfkit : Pour convertir ce code HTML en un fichier PDF parfait.
+
+ReportLab ou FPDF : dessiner le PDF ligne par ligne en Python (sans passer par le HTML).
+
+*Internationalisation (Interface Multilingue)*
+Technique : L'approche i18n (Internationalization). Au lieu d'écrire du texte "en dur" dans notre code (ex: st.write("Âge du patient")), on utilise des clés (ex: st.write(traduction["patient_age"])).
+
+Bibliothèques Python :
+
+json ou pyyaml : on va créer un fichier fr.json et un fichier en.json qui contiendront toutes les traductions.
+
+st.session_state : Pour stocker la langue actuellement choisie par l'utilisateur (via un menu déroulant en haut à droite de ton interface) et recharger l'application instantanément avec le nouveau dictionnaire de mots
+
+*Déploiement d'un Pipeline MLOps*
+Il faut automatiser la surveillance de ton modèle XGBoost pour s'assurer qu'il ne devient pas obsolète si de nouveaux profils de patients apparaissent à l'hôpital.
+
+Technique : Model Tracking (suivi des versions du modèle) et Data Drift Detection (détection de la dérive des données).
+
+Algorithmes : Le calcul de l'Indice de Stabilité de la Population (PSI) ou le test de Kolmogorov-Smirnov pour vérifier si les données d'aujourd'hui sont statistiquement différentes des données d'entraînement .
+
+Bibliothèques Python :
+
+MLflow : Le standard absolu. C'est un outil qui tourne en parallèle de notre code et qui va enregistrer chaque nouveau modèle entraîné, ses hyperparamètres, et son score d'Accuracy, pour pouvoir revenir en arrière si besoin.
+
+Evidently AI ou Alibi Detect : Des bibliothèques Python géniales qui analysent les nouvelles données patient et nous envoient une alerte.
+
+*Analyse de Survie Temporelle*
+L'analyse de survie fait de la "Régression sur le temps" (Quelle est la probabilité de survie au bout de X mois ?).
+
+Techniques & Modèles :
+
+L'estimateur de Kaplan-Meier : Un algorithme statistique classique pour tracer la courbe de survie globale d'une population au fil du temps.
+
+Random Survival Forests (RSF) ou Survival SVM : L'équivalent de nos modèles actuels de Machine Learning, mais mathématiquement modifiés pour gérer la notion de "temps jusqu'à l'événement".
+
+Bibliothèques Python :
+
+lifelines : La bibliothèque Python la plus simple et la plus réputée pour faire du Kaplan-Meier et du modèle de Cox de base.
+
+scikit-survival : Une extension fantastique de scikit-learn (que nous utilisons déjà). Elle nous permet d'entraîner des Random Survival Forests et des Survival SVM avec exactement la même syntaxe qu'on connait déjà (model.fit(), model.predict()).
