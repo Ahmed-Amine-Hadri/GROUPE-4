@@ -113,9 +113,83 @@ Hiérarchiser les risques : Visualiser si une incompatibilité HLA ou l'âge du 
 
 Renforcer la confiance : Offrir au personnel médical une interprétation transparente et explicable de l'algorithme, facilitant ainsi la prise de décision clinique.
 # prompt AI
-En tant qu'étudiants en première année de cycle d'ingénieur, nos connaissances techniques initiales étaient encore limitées pour construire une application aussi complexe de A à Z. Pour pallier ce manque, nous nous sommes appuyés sur l'intelligence artificielle, non pas comme un simple générateur de code aveugle, mais comme un véritable outil de développement collaboratif. Nous avons appris à structurer nos requêtes (Prompt Engineering) en lui fournissant systématiquement tout le contexte et l'intégralité de notre code Streamlit. Cela nous a permis d'ajouter des fonctionnalités avancées, comme un bouton de traduction dynamique anglais/français, tout en forçant l'IA à nous rendre des scripts complets pour nous éviter des erreurs complexes lors de l'intégration dans notre projet.
+Aperçu de la Méthodologie
+Pour cette session de développement, j'ai utilisé une approche structurée et itérative d'ingénierie de prompt (prompt engineering) pour améliorer mon application Streamlit. Au lieu de traiter l'IA comme un simple générateur de code, j'ai appliqué le framework CTF (Contexte, Tâche, Format) et j'ai navigué dynamiquement entre le Zero-Shot Prompting, le débogage multimodal (Multimodal Debugging) et le Meta-Prompting pour construire, déboguer et affiner mon application.
 
-Au fil du développement, nous avons inévitablement rencontré des bugs, notamment lorsque l'IA cassait notre mise en page CSS ou supprimait accidentellement une partie de notre code (les "hallucinations"). Pour corriger cela sans avoir besoin de maîtriser un vocabulaire technique trop pointu, nous avons utilisé le débogage multimodal : nous envoyions des captures d'écran de notre interface cassée à l'IA pour qu'elle "voie" le problème et nous aide à restaurer notre travail et à ajuster l'affichage (notamment pour les grands écrans). Enfin, pour éviter que l'IA ne perde le fil de notre projet médical (prédiction BMT) d'une session à l'autre, nous lui avons fait analyser notre propre code pour qu'elle rédige un résumé technique complet. Nous réutilisons ce résumé au début de chaque nouvelle session. Cette approche itérative nous a permis de surmonter nos lacunes techniques initiales et de livrer une interface stable et aboutie.
+*Phase 1 : Implémentation des Fonctionnalités (Zero-Shot & Prompting Itératif)*
+Objectif : Ajouter un bouton de bascule dynamique anglais/français à la base de code existante sans casser les états de session (session states) actuels.
+
+**Mon Prompt Initial (Application du CTF)** :
+
+"Voici mon code app.py complet pour un tableau de bord Streamlit. J'ai besoin que tu ajoutes un bouton flottant dans le coin inférieur droit qui bascule la langue de l'ensemble du site web entre l'anglais et le français. Rédige l'implémentation d'un état de session (session state) pour la langue et un dictionnaire de traduction pour les éléments de l'interface utilisateur."
+
+**Stratégie d'Ingénierie de Prompt** :
+
+Contexte : J'ai fourni l'intégralité de la base de code brute au préalable et défini l'environnement (tableau de bord Streamlit).
+
+Tâche : Définition claire de la fonctionnalité (bascule i18n via l'état de session).
+
+Format : Spécification de l'emplacement exact sur l'interface (flottant en bas à droite).
+
+Résultat : Gemini a généré avec succès la logique et le CSS personnalisé nécessaires pour épingler le bouton.
+
+**Mon Suivi Itératif (Prévention des Hallucinations/Espaces Réservés)** :
+
+"Cela semble correct, mais pour éviter les conflits de fusion (merge conflicts), fournis s'il te plaît le code app.py complet et mis à jour. N'utilise pas d'espaces réservés (placeholders) et ne tronque aucune logique existante."
+
+Stratégie : Les modèles d'IA renvoient souvent du code tronqué avec des commentaires du type "// le reste de votre code ici". En lui demandant explicitement d'éviter les espaces réservés, j'ai garanti une fusion fluide et sans erreur dans mon IDE.
+
+*Phase 2 : Débogage Multimodal & Gestion des Régressions*
+L'ajout de CSS personnalisé complexe à Streamlit a nativement perturbé mes mises en page flexbox. Lorsque la mise en page s'est cassée, je suis passé au Prompting Multimodal (combinant du texte avec des preuves visuelles) pour combler les lacunes de vocabulaire.
+
+**Mon Prompt de Débogage 1 (Ancrage Visuel)** :
+
+"Le correctif CSS a cassé l'alignement du conteneur principal. Comme tu peux le voir sur cette capture d'écran ci-jointe, l'interface utilisateur est maintenant entièrement repoussée vers le côté droit de l'écran. Ajuste s'il te plaît le CSS et les ratios de colonnes pour recentrer la mise en page principale."
+
+Stratégie : Décrire les erreurs flexbox CSS via du texte est inefficace. En téléversant une capture d'écran de l'interface cassée accompagnée d'une directive spécifique, j'ai donné à Gemini un contexte visuel instantané pour diagnostiquer avec précision les conflits de largeur de conteneur et de ratio de colonnes.
+
+**mon Prompt de Débogage 2 (Détection d'une Régression)** :
+
+"Attends, le bouton 'Save & Continue' est manquant dans la nouvelle capture d'écran que je viens de joindre. De plus, tu as accidentellement supprimé une grande partie de mon code d'origine (comme la logique de visualisation SHAP). Restaure s'il te plaît TOUT mon code d'origine exactement tel qu'il était, et utilise une cible CSS plus sûre pour le bouton flottant afin qu'il ne masque pas les boutons de mon formulaire."
+
+Stratégie : Le correctif précédent de l'IA utilisait un sélecteur CSS trop gourmand (last-of-type) qui masquait accidentellement les boutons de mon formulaire principal et résumait excessivement mon code backend. J'ai pratiqué la correction d'erreur itérative en signalant immédiatement la régression, en fournissant une preuve visuelle et en définissant explicitement une contrainte négative ("restaurer TOUT le code d'origine"). Cela a forcé Gemini à implémenter une ancre CSS plus sûre (#lang-anchor).
+
+*Phase 3 : Meta-Prompting & Standardisation du Contexte*
+À mesure que l'application devenait plus complexe, j'ai réalisé que l'IA pourrait perdre le fil des nuances médicales et techniques spécifiques de mon projet lors de sessions futures.
+
+**Mon Meta-Prompt** :
+
+"En te basant sur le code sur lequel nous avons travaillé, rédige s'il te plaît une description complète du projet et un bloc de contexte. Je souhaite utiliser cela comme un prompt système (system prompt) pour les futures sessions d'IA afin que l'IA comprenne instantanément l'objectif clinique et l'architecture technique de ce prédicteur BMT."
+
+**Stratégie d'Ingénierie de Prompt** :
+
+Il s'agit d'une technique avancée. Au lieu d'écrire le contexte manuellement, j'ai demandé à l'IA de faire de la rétro-ingénierie (reverse-engineer) sur ma base de code et de générer un "Prompt Système" hautement optimisé pour les interactions futures.
+
+Résultat : Gemini a généré un résumé complet décrivant ma stack technique (Streamlit, XGBoost, LightGBM), la logique de l'interface utilisateur et les variables cliniques (HLA, doses de CD34+). J'ai maintenant un bloc de persona standardisé pour ancrer toutes les futures sessions de débogage avec l'IA.
+
+*Phase 4: Peaufinage UI/UX*
+Avec les fonctionnalités principales opérationnelles et la mise en page stabilisée, ma dernière étape a consisté à optimiser l'utilisabilité en me basant sur des retours visuels pour les moniteurs larges (widescreen).
+
+**Nos Prompts de Raffinement (Chaînage de Contraintes)** :
+
+"Regarde cette capture d'écran : l'application ne prend qu'une colonne étroite au milieu et laisse trop d'espace vide sur mon écran large. Modifie s'il te plaît le CSS pour que le conteneur principal remplisse dynamiquement 90 % de la largeur de l'écran."
+
+"Maintenant, augmente la taille de la police de base d'environ 10 à 15 % sur tous les composants natifs de Streamlit et les en-têtes HTML pour améliorer la lisibilité."
+
+**Stratégie d'Ingénierie de Prompt** :
+
+J'ai utilisé des contraintes claires en langage naturel associées à des retours visuels pour ajuster les paramètres front-end. Donner à l'IA des métriques exactes (90 % de largeur, échelle de 10-15 %) élimine les approximations. Gemini a traduit avec succès ces demandes UX en langage courant en ajustements CSS spécifiques et précis, optimisés pour mon environnement de déploiement.
+
+Résumé des Compétences d'Ingénierie de Prompt Appliquées
+Tout au long de cette session, j'ai démontré avec succès :
+
+Injection de Contexte (Context Injection) : Fournir l'intégralité de la base de code en amont et établir des règles de formatage strictes (pas d'espaces réservés).
+
+Débogage Multimodal (Multimodal Debugging) : Utilisation de captures d'écran pour accélérer considérablement le dépannage front-end et contourner les lacunes du vocabulaire technique.
+
+Contraintes Négatives & Raffinement Itératif : Détection des hallucinations de l'IA (résumé/suppression de code) et forçage des corrections grâce à des retours directs et spécifiques.
+
+Meta-Prompting : Conception d'un bloc de "Contexte du Projet" réutilisable pour aligner l'IA avec les domaines médicaux et techniques hautement spécifiques de l'application pour une utilisation future
 # Systeme de suivi
 Pour garantir la maintenabilité et faciliter le débogage de l'application, un système de journalisation centralisé a été implémenté via la fonction utilitaire get_logger. Plutôt que d'utiliser de simples requêtes print(), ce module génère des logs standardisés incluant l'horodatage précis, le module concerné et le niveau de gravité du message (INFO, ERROR, etc.). Son architecture est spécialement pensée pour des environnements interactifs comme Streamlit : elle intègre une sécurité (if not logger.handlers:) qui empêche la duplication des messages lors des rechargements multiples de l'interface. De plus, en redirigeant les flux directement vers la sortie standard (sys.stdout), ce système rend l'application "Cloud-ready", permettant aux outils de monitoring externes (comme Docker ou les plateformes cloud) de capturer et d'analyser nativement l'activité et les erreurs du modèle en production
 # Roadmap
