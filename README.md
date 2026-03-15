@@ -16,18 +16,16 @@
 
 **reduce_multicollinearity** : Supprime les variables trop corrélées entre elles (R > 0.80) pour simplifier le modèle et limiter le risque de surapprentissage (overfitting).
 
-**Augmentation des Données (SMOTE) et Sécurité**:
-Pour améliorer l'apprentissage de nos modèles sans fausser l'évaluation, nous avons appliqué une stratégie stricte d'augmentation de données :
+**Augmentation des Données (SMOTE)**:
+Pour améliorer l'apprentissage de nos modèles sans fausser l'évaluation, nous avons décidé d'appliquer une stratégie stricte d'augmentation de données , mais on l'a laissée tomber parsuite pour les raisons suivantes :
 
-La Règle d'Or (Zéro Fuite de Données) : Avant toute modification, nous avons isolé 10% du dataset (19 patients). Ce jeu de test est gardé intact pour garantir une évaluation finale sur des données 100% réelles.
+Chute paradoxale de la précision : Les tests ont montré que l'ajout de données artificielles dégradait directement les performances de nos modèles IA.
 
-Génération Synthétique (SMOTE) : Nous avons appliqué l'algorithme SMOTE uniquement sur les 90% restants (le jeu d'entraînement) pour créer des profils cliniques virtuels réalistes.
+Bruit statistique sévère : Sur un jeu de données très restreint (180 lignes), l'augmentation a déformé la distribution réelle au lieu de l'enrichir.
 
-Le Résultat (2 Fichiers) :
+Incohérences physiques ou opérationnelles : La génération synthétique a créé des points de données irréalistes, brouillant ainsi les frontières de décision entre nos classes.
 
-augmented_train_dataset_400.csv : Un jeu d'entraînement enrichi et parfaitement équilibré de 400 patients (200 survivants / 200 décès) pour nourrir nos modèles (XGBoost, SVM, etc.).
-
-holdout_test_dataset.csv : Le jeu de test pur de 19 patients réels, utilisé exclusivement comme "examen final" pour valider l'IA.
+Apprentissage d'artefacts : Les algorithmes ont commencé à apprendre les biais liés à la méthode de génération elle-même, au détriment du signal mathématique sous-jacent.
 # Train models
 En recherche médicale pédiatrique, les données sont rares (190 patients ici). Une division classique 70:20:10 (Entraînement / Validation / Test) n'aurait laissé que 133 patients pour l'entraînement, un volume insuffisant pour des modèles complexes comme XGBoost, entraînant une forte instabilité.
 
